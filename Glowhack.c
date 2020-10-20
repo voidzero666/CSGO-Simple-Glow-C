@@ -127,7 +127,7 @@ int main()
 
 	while (thread) {
 		printf("Waiting on glow thread\n");
-    	Sleep(1000);
+    		Sleep(1000);
   	}
     return 0;
 }
