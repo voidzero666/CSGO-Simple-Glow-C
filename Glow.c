@@ -42,9 +42,9 @@ float HR = 0.8f;
 bool t = true;
 bool f = false;
 
-HANDLE handlProcess;
+HANDLE ProcessHandle;
 DWORD ProcessID;
-DWORD dwClient;
+DWORD ClientBaseAddress;
 DWORD dwEngine;
 int iClientState;
 
@@ -53,7 +53,7 @@ DWORD dwLocalPlayer = 0xD3DD14;
 DWORD dwEntityList = 0x4D523AC;
 DWORD m_iGlowIndex = 0xA438;
 
-DWORD FetchModBase(LPSTR lpModuleName, DWORD dwProcessId)
+DWORD GetModuleBaseAdress_C(LPSTR lpModuleName, DWORD dwProcessId)
 {
 	MODULEENTRY32 lpModEntryPoint = { 0 };
 	HANDLE handleSnap = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, dwProcessId);
@@ -78,26 +78,26 @@ DWORD WINAPI Glow(void* PARAMS){
 	while (1) {
 		for (int i = 1; i <= 64; i++) {
 			GlowEntityIdx = i;
-			ReadProcessMemory(handlProcess, (LPVOID)(dwClient + dwGlowObjectManager), &GlowBasePtr, sizeof(GlowBasePtr), NULL);
-			ReadProcessMemory(handlProcess, (LPVOID)(dwClient + dwLocalPlayer), &LocalPlayer, sizeof(LocalPlayer), NULL);
-			ReadProcessMemory(handlProcess, (LPVOID)(LocalPlayer + 0xF4), &LocalTeam, sizeof(LocalTeam), NULL);
-			ReadProcessMemory(handlProcess, (LPVOID)(dwClient + dwEntityList + (GlowEntityIdx - 1) * 0x10), &Glower, sizeof(Glower), NULL);
-			ReadProcessMemory(handlProcess, (LPVOID)(Glower + m_iGlowIndex), &EntityGlowIndex, sizeof(EntityGlowIndex), NULL);
-			ReadProcessMemory(handlProcess, (LPVOID)(Glower + 0xF4), &GLLocalTeam, sizeof(GLLocalTeam), NULL);
-			ReadProcessMemory(handlProcess, (LPVOID)(Glower + 0x100), &entityHealth, sizeof(entityHealth), NULL);
+			ReadProcessMemory(ProcessHandle, (LPVOID)(ClientBaseAddress + dwGlowObjectManager), &GlowBasePtr, sizeof(GlowBasePtr), NULL);
+			ReadProcessMemory(ProcessHandle, (LPVOID)(ClientBaseAddress + dwLocalPlayer), &LocalPlayer, sizeof(LocalPlayer), NULL);
+			ReadProcessMemory(ProcessHandle, (LPVOID)(LocalPlayer + 0xF4), &LocalTeam, sizeof(LocalTeam), NULL);
+			ReadProcessMemory(ProcessHandle, (LPVOID)(ClientBaseAddress + dwEntityList + (GlowEntityIdx - 1) * 0x10), &Glower, sizeof(Glower), NULL);
+			ReadProcessMemory(ProcessHandle, (LPVOID)(Glower + m_iGlowIndex), &EntityGlowIndex, sizeof(EntityGlowIndex), NULL);
+			ReadProcessMemory(ProcessHandle, (LPVOID)(Glower + 0xF4), &GLLocalTeam, sizeof(GLLocalTeam), NULL);
+			ReadProcessMemory(ProcessHandle, (LPVOID)(Glower + 0x100), &entityHealth, sizeof(entityHealth), NULL);
 
 			// Health based calculations
 			HR = (255 - 2.55 * entityHealth) / 255.f;
 			HG = 2.55 * entityHealth / 255.f;
 
 			if (GLLocalTeam != LocalTeam) {
-				WriteProcessMemory(handlProcess, (LPVOID)(GlowBasePtr + ((EntityGlowIndex * 0x38) + 0x4)), &HR, sizeof(HR), NULL);
-				WriteProcessMemory(handlProcess, (LPVOID)(GlowBasePtr + ((EntityGlowIndex * 0x38) + 0x8)), &HG, sizeof(HG), NULL);
-				WriteProcessMemory(handlProcess, (LPVOID)(GlowBasePtr + ((EntityGlowIndex * 0x38) + 0xC)), &B2, sizeof(B2), NULL);
-				WriteProcessMemory(handlProcess, (LPVOID)(GlowBasePtr + ((EntityGlowIndex * 0x38) + 0x10)), &ALFA, sizeof(ALFA), NULL);
-				WriteProcessMemory(handlProcess, (LPVOID)(GlowBasePtr + ((EntityGlowIndex * 0x38) + 0x24)), &t, sizeof(t), NULL);
-				WriteProcessMemory(handlProcess, (LPVOID)(GlowBasePtr + ((EntityGlowIndex * 0x38) + 0x25)), &f, sizeof(f), NULL);
-				WriteProcessMemory(handlProcess, (LPVOID)(GlowBasePtr + ((EntityGlowIndex * 0x38) + 0x2C)), &f, sizeof(f), NULL);
+				WriteProcessMemory(ProcessHandle, (LPVOID)(GlowBasePtr + ((EntityGlowIndex * 0x38) + 0x4)), &HR, sizeof(HR), NULL);
+				WriteProcessMemory(ProcessHandle, (LPVOID)(GlowBasePtr + ((EntityGlowIndex * 0x38) + 0x8)), &HG, sizeof(HG), NULL);
+				WriteProcessMemory(ProcessHandle, (LPVOID)(GlowBasePtr + ((EntityGlowIndex * 0x38) + 0xC)), &B2, sizeof(B2), NULL);
+				WriteProcessMemory(ProcessHandle, (LPVOID)(GlowBasePtr + ((EntityGlowIndex * 0x38) + 0x10)), &ALFA, sizeof(ALFA), NULL);
+				WriteProcessMemory(ProcessHandle, (LPVOID)(GlowBasePtr + ((EntityGlowIndex * 0x38) + 0x24)), &t, sizeof(t), NULL);
+				WriteProcessMemory(ProcessHandle, (LPVOID)(GlowBasePtr + ((EntityGlowIndex * 0x38) + 0x25)), &f, sizeof(f), NULL);
+				WriteProcessMemory(ProcessHandle, (LPVOID)(GlowBasePtr + ((EntityGlowIndex * 0x38) + 0x2C)), &f, sizeof(f), NULL);
 			}
 		}
 		Sleep(1);
@@ -107,7 +107,7 @@ DWORD WINAPI Glow(void* PARAMS){
 
 int main()
 {
-  	printf("Hello, World! This is a native C program compiled on the command line.\n");
+   	printf("Hello, World! This is a native C program compiled on the command line.\n");
 	printf("Super Simple external glow in C\n");
 	printf("Credits: VoidZero1337 @ https://github.com/voidzero-development\n");
 
@@ -119,9 +119,9 @@ int main()
 	} while (windowHandle == NULL);
 
 	GetWindowThreadProcessId(windowHandle, &ProcessID);
-	handlProcess = OpenProcess(PROCESS_ALL_ACCESS, 0, ProcessID);
+	ProcessHandle = OpenProcess(PROCESS_ALL_ACCESS, 0, ProcessID);
 
-	dwClient = FetchModBase((LPSTR)"client.dll", ProcessID); //used to be client_panorama.dll
+	ClientBaseAddress = GetModuleBaseAdress_C((LPSTR)"client.dll", ProcessID); //used to be client_panorama.dll
 
 	HANDLE thread = CreateThread(NULL, 0, Glow, NULL, 0, NULL);
 
