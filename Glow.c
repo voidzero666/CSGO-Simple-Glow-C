@@ -107,7 +107,7 @@ DWORD WINAPI Glow(void* PARAMS){
 
 int main()
 {
-  printf("Hello, World! This is a native C program compiled on the command line.\n");
+  	printf("Hello, World! This is a native C program compiled on the command line.\n");
 	printf("Super Simple external glow in C\n");
 	printf("Credits: VoidZero1337 @ https://github.com/voidzero-development\n");
 
