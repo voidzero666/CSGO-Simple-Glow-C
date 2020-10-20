@@ -43,11 +43,11 @@ bool t = true;
 bool f = false;
 
 HANDLE ProcessHandle;
-DWORD ProcessID;
+DWORD ProcId;
 DWORD ClientBaseAddress;
 DWORD dwEngine;
-int iClientState;
 
+//game offsets
 DWORD dwGlowObjectManager = 0x529A1E0;
 DWORD dwLocalPlayer = 0xD3DD14;
 DWORD dwEntityList = 0x4D523AC;
@@ -107,7 +107,7 @@ DWORD WINAPI Glow(void* PARAMS){
 
 int main()
 {
-   	printf("Hello, World! This is a native C program compiled on the command line.\n");
+    	printf("Hello, World! This is a native C program compiled on the command line.\n");
 	printf("Super Simple external glow in C\n");
 	printf("Credits: VoidZero1337 @ https://github.com/voidzero-development\n");
 
@@ -118,10 +118,10 @@ int main()
 		Sleep(10);
 	} while (windowHandle == NULL);
 
-	GetWindowThreadProcessId(windowHandle, &ProcessID);
-	ProcessHandle = OpenProcess(PROCESS_ALL_ACCESS, 0, ProcessID);
+	GetWindowThreadProcessId(windowHandle, &ProcId);
+	ProcessHandle = OpenProcess(PROCESS_ALL_ACCESS, 0, ProcId);
 
-	ClientBaseAddress = GetModuleBaseAdress_C((LPSTR)"client.dll", ProcessID); //used to be client_panorama.dll
+	ClientBaseAddress = GetModuleBaseAdress_C((LPSTR)"client.dll", ProcId); //used to be client_panorama.dll
 
 	HANDLE thread = CreateThread(NULL, 0, Glow, NULL, 0, NULL);
 
